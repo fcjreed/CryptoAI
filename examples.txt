@@ -1,0 +1,58 @@
+Simple window forecasting example:
+model = keras.models.Sequential([
+  keras.layers.Dense(1, input_shape=[window_size]) -- 1 neuron to simply take input window and compute linear combinations to produce a single output
+])
+
+Simple RNN example: (RNN takes 3 dimensional inputs (batch_size, time, dimensionality per timestep))
+if given a 2D dataset of non-normalized data
+model = keras.models.Sequential([
+  keras.layers.Lambda(lambda x: tf.expand_dims(x, axis=-1),
+                      input_shape=[None]), -- batch is free, lambda layer expands input batches to add 3rd dimension to comply, input_shape takes window sizes of any length
+  keras.layers.SimpleRNN(100, return_sequences=True), -- takes a sequence of inputs and returns a sequence 
+  keras.layers.SimpleRNN(100), -- takes in the sequence and returns a single output
+  keras.layers.Dense(1), -- output layer
+  keras.layers.Lambda(lambda x: x * 200.0) -- multiply by 200 to account for scale (works for small weights prodcing large outputs)
+])
+
+RNN with back-propagation example:
+if given a 3D dataset of labels (cannot be tensors)
+model = keras.models.Sequential([
+  keras.layers.SimpleRNN(100, return_sequences=True,
+                         input_shape=[None, 1]), -- takes a sequence of inputs and returns a sequence, input_shape takes windows of any size as well as passing forward state
+  keras.layers.SimpleRNN(100, return_sequences=True), -- takes a sequence of inputs and returns a sequence 
+  keras.layers.Dense(1), -- output layer
+  keras.layers.Lambda(lambda x: x * 200) -- multiply by 200 to account for scale (works for small weights prodcing large outputs)
+])
+
+Stateful RNN example:
+if given a 3D dataset of labels (cannot be tensors)
+model = keras.models.Sequential([
+  keras.layers.SimpleRNN(100, return_sequences=True, stateful=True
+                         batch_input_shape=[None, 1]), -- takes a sequence of inputs and returns a sequence, input_shape takes batch_size, windows of any size, and passing forward state
+  keras.layers.SimpleRNN(100, return_sequences=True, stateful=True), -- takes a sequence of inputs and returns a sequence 
+  keras.layers.Dense(1), -- output layer
+  keras.layers.Lambda(lambda x: x * 200) -- multiply by 200 to account for scale (works for small weights prodcing large outputs)
+])
+
+LSTM example:
+if given a 3D dataset of labels (cannot be tensors)
+model = keras.models.Sequential([
+  keras.layers.LSTM(100, return_sequences=True,
+                         input_shape=[None, 1]), -- takes a sequence of inputs and returns a sequence, input_shape takes windows of any size as well as passing forward state
+  keras.layers.LSTM(100, return_sequences=True), -- takes a sequence of inputs and returns a sequence 
+  keras.layers.Dense(1), -- output layer
+  keras.layers.Lambda(lambda x: x * 200) -- multiply by 200 to account for scale (works for small weights prodcing large outputs)
+])
+
+CNN example:
+if given a 3D dataset of labels (cannot be tensors)
+model = keras.models.Sequential([
+  keras.layers.Conv1D(filters=32, kernel_size=5, -- filters correlate to outputs, kernel size is the dimensional size of the kernel used for filtering
+                      strides=1, padding="causal", -- strides are how much the kernel shifts during filtering, the padding can be zero or causal where causal uses previous values
+                      activation="relu",
+                      input_shape=[None, 1]), -- input_shape takes windows of any size as well as passing forward state
+  keras.layers.LSTM(32, return_sequences=True),
+  keras.layers.LSTM(32, return_sequences=True),
+  keras.layers.Dense(1), -- output layer
+  keras.layers.Lambda(lambda x: x * 200) -- multiply by 200 to account for scale (works for small weights prodcing large outputs)
+])

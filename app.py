@@ -1,6 +1,7 @@
 import json
 import matplotlib.pyplot as plt
 import normalizer as norm
+import numpy as np
 import pandas as pd
 import tensorflow as tf
 from backfiller import BackFiller
@@ -25,24 +26,5 @@ counter = 0
 while counter < len(test_input_data):
     test_input_data[counter] = norm.normalize_zscore(test_input_data[counter])
     counter += 1
-#output = norm.normalize_zscore(output)
+output = norm.normalize_zscore(output)
 
-with open("datasets/normalized_train_data.txt", "w") as filehandle:
-    json.dump(input_data, filehandle)
-
-with open("datasets/normalized_test_data.txt", "w") as filehandle:
-    json.dump(test_input_data, filehandle)
-
-# model = keras.Sequential([
-#     layers.Dense(4, input_shape=[4,1], activation=tf.nn.relu),
-#     layers.Dense(1, activation=tf.nn.softmax)
-# ])
-
-# model.compile(optimizer='adam',
-#             loss=keras.losses.SparseCategoricalCrossentropy(),
-#             metrics=['accuracy'])
-
-# history = model.fit(input_data, output, epochs=EPOCHS, verbose=False)
-# plt.xlabel('Epoch')
-# plt.ylabel('Loss')
-# plt.plot(history.history['loss'])
