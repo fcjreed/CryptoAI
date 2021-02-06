@@ -24,7 +24,7 @@ model = keras.models.Sequential([
   keras.layers.Lambda(lambda x: x * 200) -- multiply by 200 to account for scale (works for small weights prodcing large outputs)
 ])
 
-Stateful RNN example:
+Stateful RNN example: (Note: during training, when the epoch splits, it's best to reset the state)
 if given a 3D dataset of labels (cannot be tensors)
 model = keras.models.Sequential([
   keras.layers.SimpleRNN(100, return_sequences=True, stateful=True

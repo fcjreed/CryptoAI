@@ -59,9 +59,9 @@ class BackFiller:
                 )
             )
             start_date = datetime.fromisoformat(new_start_date)
-            return [
-                item for sublist in candle_data for item in sublist
-            ]  # flatten the data
+        return [
+            item for sublist in candle_data for item in sublist
+        ]  # flatten the data
 
     class CandleDataEncoder(json.JSONEncoder):
         """[summary]
