@@ -1,3 +1,5 @@
+#Neural Networks for a series of data over time
+
 Simple window forecasting example:
 model = keras.models.Sequential([
   keras.layers.Dense(1, input_shape=[window_size]) -- 1 neuron to simply take input window and compute linear combinations to produce a single output
@@ -51,8 +53,36 @@ model = keras.models.Sequential([
                       strides=1, padding="causal", -- strides are how much the kernel shifts during filtering, the padding can be zero or causal where causal uses previous values
                       activation="relu",
                       input_shape=[None, 1]), -- input_shape takes windows of any size as well as passing forward state
-  keras.layers.LSTM(32, return_sequences=True),
-  keras.layers.LSTM(32, return_sequences=True),
+  keras.layers.LSTM(32, return_sequences=True), -- takes a sequence of inputs and returns a sequence, in this case 32
+  keras.layers.LSTM(32, return_sequences=True), -- takes a sequence of inputs and returns a sequence, in this case 32
   keras.layers.Dense(1), -- output layer
   keras.layers.Lambda(lambda x: x * 200) -- multiply by 200 to account for scale (works for small weights prodcing large outputs)
+])
+
+#Neural Network for NLP
+
+tokenizer = Tokenizer(num_words = vocab_size, oov_token=oov_tok) -- vocab size will store the "num_words" of common words, oov_token is used to indicate words outside of vocabulary
+tokenizer.fit_on_texts(training_sentences) -- converts the text sequence to a map of numbers to words
+sequences = tokenizer.texts_to_sequences(training_sentences) -- converts the text sequence to a sequence of numbers based on the mapping above
+padded = pad_sequences(sequences,maxlen=max_length, padding=padding_type, -- pads the data to comply with input sequences being the same size
+                       truncating=trunc_type) -- maxlen is the maximum length a sequence can be, padding (pads 0's) can be pre or post, and truncating(cuts off values) can be pre or post
+
+Basic example
+model = tf.keras.Sequential([
+    tf.keras.layers.Embedding(vocab_size, embedding_dim, input_length=max_length), -- embedding is analogous to anagrams, where vocab_size is your "num_words" from above, embedding_dim is the number of anagrams per word, and input length is the maxlen from above
+    tf.keras.layers.Flatten(), -- Flatten to a 1D vector
+    tf.keras.layers.Dense(6, activation='relu'), -- hidden layer with 6 neurons
+    tf.keras.layers.Dense(1, activation='sigmoid') -- output layer
+])
+
+Advanced LSTM example:
+Note: Unlike basic neural networks, you no longer need to use Flatten or GlobalAveragePooling1D after the LSTM layer 
+the LSTM can take the output of an Embedding layer and directly hook up to a fully-connected Dense layer with its own output
+model_multiple_bidi_lstm = tf.keras.Sequential([
+    tf.keras.layers.Embedding(vocab_size, embedding_dim, input_length=max_length), -- embedding is analogous to anagrams, where vocab_size is your "num_words" from above, embedding_dim is the number of anagrams per word, and input length is the maxlen from above
+    tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(embedding_dim, 
+                                                       return_sequences=True)), -- Bidirectional LSTM behaves like a normal LSTM but includes back-propagation (must return sequences if next layer is LSTM or similar)
+    tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(embedding_dim)), -- Bidirectional LSTM behaves like a normal LSTM but includes back-propagation, but since the next layer is a hidden dense layer then no need to return a sequence
+    tf.keras.layers.Dense(6, activation='relu'), -- hidden layer with 6 neurons
+    tf.keras.layers.Dense(1, activation='sigmoid') -- output layer
 ])

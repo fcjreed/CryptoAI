@@ -3,21 +3,6 @@ import numpy as np
 import scipy
 import statistics
 
-def setup_transposed_data(data):
-    output = []
-    open = []
-    low = []
-    high = []
-    volume = []
-    for dat in data:
-        open.append(dat['open'])
-        low.append(dat['low'])
-        high.append(dat['high'])
-        volume.append(dat['volume'])
-        output.append(dat['close'])
-    input = [open, low, high, volume]
-    return input, output
-
 def normalize_zscore(input):
     mean = statistics.mean(input)
     std = statistics.pstdev(input)

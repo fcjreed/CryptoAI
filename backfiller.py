@@ -1,8 +1,11 @@
 import coinbasepro as cbp
+import csv
 import decimal
 import json
+import pandas as pd
 from datetime import datetime
 from datetime import timedelta
+from typing import Any, List, Dict
 
 
 class BackFiller:
@@ -59,9 +62,10 @@ class BackFiller:
                 )
             )
             start_date = datetime.fromisoformat(new_start_date)
-        return [
-            item for sublist in candle_data for item in sublist
-        ]  # flatten the data
+        transformed_data = [item for sublist in candle_data for item in sublist]  # flatten the data
+        finaldata = {}
+        finaldata.data = transformed_data
+        return transformed_data
 
     class CandleDataEncoder(json.JSONEncoder):
         """[summary]
@@ -117,8 +121,8 @@ class BackFiller:
 
     def load_training_data(
         self,
-        train_data_file="datasets/train_data.txt",
-        test_data_file="datasets/test_data.txt",
+        train_data_file="datasets/train_data.json",
+        test_data_file="datasets/test_data.json",
     ):
         """[summary]
             Loads the training data into arrays based on given file locations.
@@ -129,9 +133,50 @@ class BackFiller:
         Returns:
             [type]: [description]
         """
-        with open(train_data_file, "r") as filehandle:
-            train_data = json.load(filehandle)
-
-        with open(test_data_file, "r") as filehandle:
-            test_data = json.load(filehandle)
+        train_data = pd.read_json(train_data_file)
+        test_data = pd.read_json(test_data_file)
         return train_data, test_data
+
+    def convert_to_csv(self, json_file: str):
+        """[summary]
+            Converts a json file to csv.
+        Args:
+            json_file (str): [description] The path to the file to convert
+        """
+        with open(json_file) as file:
+            data = json.load(file)
+        data = data["data"]
+        csv_file = open(json_file.replace(".json", ".csv"), "w")
+        csv_writer = csv.writer(csv_file)
+        counter = 0
+        for dat in data:
+            if counter == 0:
+                headers = dat.keys()
+                csv_writer.writerow(headers)
+                counter += 1
+            csv_writer.writerow(dat.values())
+        csv_file.close()
+
+    def setup_transposed_data(self, data: List[Dict[str, Any]]):
+        """[summary]
+            Given a list of coinbase dictionary candle data, converts to 4x1 array for input and a 1x1 array for output.
+        Args:
+            data (List[Dict[str, Any]]): [description]
+            The list of dictionary candle data
+        Returns:
+            [List[float]]: [description]
+            Returns the float values for open, low, high, and volume as the input. Also returns the float values for close as the output.
+        """
+        output = []
+        open = []
+        low = []
+        high = []
+        volume = []
+        for dat in data:
+            open.append(dat["open"])
+            low.append(dat["low"])
+            high.append(dat["high"])
+            volume.append(dat["volume"])
+            output.append(dat["close"])
+        input = [open, low, high, volume]
+        return input, output
