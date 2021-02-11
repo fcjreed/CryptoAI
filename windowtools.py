@@ -88,11 +88,6 @@ def compile_early_checkpoint_SGD(
     ]  # Return callbacks to use for fitting
 
 
-def plot_learning_rate(history, xmin, xmax):
-    plt.semilogx(history.history["lr"], history.history["loss"])
-    plt.axis([xmin, xmax, 0, 20])
-
-
 class ResetStatesCallback(keras.callbacks.Callback):
     def on_epoch_begin(self, epoch, logs):
         self.model.reset_states()
